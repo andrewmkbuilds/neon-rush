@@ -42,11 +42,25 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
   }
+  /* Keep text selection functional inside form fields */
+  input, textarea, select, [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+  /* Stop long-press image drag/save on mobile */
+  img { -webkit-user-drag: none; }
   body {
     @apply bg-background text-foreground font-body;
     background-color: #05060D;
     overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+    touch-action: manipulation;
   }
   html, body, #root {
     height: 100%;
@@ -54,8 +68,7 @@
 }
 
 @layer utilities {
-  .touch-none { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-  button, a, [role="button"], nav { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  .touch-none { touch-action: none; }
   /* Prevent scroll bouncing inside mobile WebViews for any scroll panel. */
   .overflow-y-auto { overscroll-behavior-y: contain; }
 }
@@ -88,4 +101,12 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Push44 – Permanently hide Base44 branding badge */
+#base44-edit-badge, #base44-badge, .base44-badge, div[id*='base44'], [data-base44-badge], .made-with-base44, [class*='base44'], #admin-footer {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }

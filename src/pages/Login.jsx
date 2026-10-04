@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Mail, Lock, Loader2, ArrowLeft, Rocket } from "lucide-react";
+import { Mail, Lock, Loader2, ArrowLeft } from "lucide-react";
 import GoogleIcon from "@/components/GoogleIcon";
+import Logo from "@/components/Logo";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
 export default function Login() {
@@ -44,8 +45,11 @@ export default function Login() {
         <Link to="/" className="flex items-center gap-2 text-sm text-[#94A3B8] hover:text-[#F8FAFC] transition">
           <ArrowLeft size={18} /> Back to game
         </Link>
-        <span className="font-display font-black tracking-widest text-sm" style={{ background: "linear-gradient(90deg,#00F5FF,#FF2E93)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
-          NEON RUSH
+        <span className="flex items-center gap-1.5">
+          <Logo size={20} rounded="rounded-md" />
+          <span className="font-display font-black tracking-widest text-sm" style={{ background: "linear-gradient(90deg,#00F5FF,#FF2E93)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
+            NEON RUSH
+          </span>
         </span>
         <div className="w-20" />
       </div>
@@ -53,9 +57,7 @@ export default function Login() {
       <div className="relative z-10 flex-1 flex items-center justify-center px-4 py-10">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style={{ background: "rgba(0,245,255,0.12)", boxShadow: "0 0 28px rgba(0,245,255,0.35)" }}>
-              <Rocket size={30} className="text-[#00F5FF]" />
-            </div>
+            <Logo size={64} rounded="rounded-2xl" className="mx-auto mb-4" />
             <h1 className="font-display font-black tracking-widest text-3xl" style={{ background: "linear-gradient(90deg,#00F5FF,#8B5CF6)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
               PILOT LOGIN
             </h1>

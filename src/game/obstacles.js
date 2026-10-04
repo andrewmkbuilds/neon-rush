@@ -703,7 +703,7 @@ export class ObstacleManager {
     const ang = Math.atan2(o.vy, o.vx) || 0;
     ctx.translate(o.x, o.y); ctx.rotate(ang);
     ctx.shadowColor = o.glow;
-    ctx.shadowBlur = finalPhase ? 22 + Math.sin(o.age * 16) * 6 : 16;
+    ctx.shadowBlur = finalPhase ? 28 + Math.sin(o.age * 16) * 6 : 20;
     ctx.fillStyle = o.color;
     polyPath(ctx, 0, 0, rr * pulse, 3, 0);
     ctx.fill();
@@ -718,7 +718,7 @@ export class ObstacleManager {
   drawSquare(ctx, o) {
     const rot = (o.pattern === "circular" || o.pattern === "figure8") ? o.age * 1.6 : o.age * 0.7;
     ctx.translate(o.x, o.y); ctx.rotate(rot);
-    ctx.shadowColor = o.glow; ctx.shadowBlur = 12;
+    ctx.shadowColor = o.glow; ctx.shadowBlur = 18;
     ctx.fillStyle = o.color;
     ctx.fillRect(-o.r, -o.r, o.r * 2, o.r * 2);
     ctx.shadowBlur = 0;
@@ -741,7 +741,7 @@ export class ObstacleManager {
     }
     const ang = Math.atan2(o.vy, o.vx) || 0;
     ctx.translate(o.x, o.y); ctx.rotate(ang);
-    ctx.shadowColor = o.glow; ctx.shadowBlur = o.phase === "dash" ? 22 : 12;
+    ctx.shadowColor = o.glow;     ctx.shadowBlur = o.phase === "dash" ? 28 : 18;
     ctx.fillStyle = o.color;
     polyPath(ctx, 0, 0, o.r, 4, 0);
     ctx.fill();
@@ -762,7 +762,7 @@ export class ObstacleManager {
       ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
       ctx.setLineDash([]);
     } else if (o.active > 0) {
-      ctx.shadowColor = o.color; ctx.shadowBlur = 22;
+      ctx.shadowColor = o.color; ctx.shadowBlur = 28;
       ctx.strokeStyle = o.color; ctx.lineWidth = o.thick; ctx.lineCap = "round";
       ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
       ctx.shadowBlur = 0;
@@ -775,7 +775,7 @@ export class ObstacleManager {
   drawRotator(ctx, o) {
     const spacing = TAU / o.N;
     const bladeArc = o.fill * spacing;
-    ctx.shadowColor = o.glow; ctx.shadowBlur = 14;
+    ctx.shadowColor = o.glow; ctx.shadowBlur = 20;
     ctx.strokeStyle = o.color; ctx.lineWidth = o.thick; ctx.lineCap = "round";
     for (let i = 0; i < o.N; i++) {
       const a0 = o.ang + i * spacing;
@@ -796,7 +796,7 @@ export class ObstacleManager {
     if (o.phase === "blast") {
       const a = clamp(o.blastT / 0.28, 0, 1);
       const br = o.blastR * (1.1 - a * 0.3);
-      ctx.shadowColor = o.glow; ctx.shadowBlur = 30;
+      ctx.shadowColor = o.glow; ctx.shadowBlur = 36;
       ctx.fillStyle = `rgba(251,146,60,${a * 0.45})`;
       ctx.beginPath(); ctx.arc(o.x, o.y, br, 0, TAU); ctx.fill();
       ctx.strokeStyle = `rgba(251,146,60,${a})`; ctx.lineWidth = 4;
@@ -813,7 +813,7 @@ export class ObstacleManager {
       ctx.setLineDash([]);
     }
     ctx.translate(o.x, o.y); ctx.rotate(o.age * 1.5);
-    ctx.shadowColor = o.glow; ctx.shadowBlur = 14;
+    ctx.shadowColor = o.glow; ctx.shadowBlur = 20;
     ctx.fillStyle = o.color;
     starPath(ctx, 0, 0, o.r, o.r * 0.45, 4, 0);
     ctx.fill();
@@ -835,7 +835,7 @@ export class ObstacleManager {
       return;
     }
     ctx.translate(o.x, o.y); ctx.rotate(o.age * 1.2);
-    ctx.shadowColor = o.glow; ctx.shadowBlur = 16;
+    ctx.shadowColor = o.glow; ctx.shadowBlur = 22;
     ctx.fillStyle = o.color;
     polyPath(ctx, 0, 0, o.r, 6, 0); ctx.fill();
     ctx.shadowBlur = 0;
@@ -852,7 +852,7 @@ export class ObstacleManager {
   // HEXAGON — splitter (pink). Special: splits into smaller hexagons.
   drawSplit(ctx, o) {
     ctx.translate(o.x, o.y); ctx.rotate(o.age * 2);
-    ctx.shadowColor = o.glow; ctx.shadowBlur = 14;
+    ctx.shadowColor = o.glow; ctx.shadowBlur = 20;
     ctx.fillStyle = o.color;
     polyPath(ctx, 0, 0, o.r, 6, 0); ctx.fill();
     ctx.shadowBlur = 0;
@@ -864,7 +864,7 @@ export class ObstacleManager {
 
   // RECTANGLE — barrier wall (cyan) with a navigable gap.
   drawBarrier(ctx, o) {
-    ctx.shadowColor = o.glow; ctx.shadowBlur = 14;
+    ctx.shadowColor = o.glow; ctx.shadowBlur = 20;
     ctx.fillStyle = o.color;
     if (o.vertical) {
       const g1 = o.gapCenter - o.gap / 2, g2 = o.gapCenter + o.gap / 2;
@@ -900,7 +900,7 @@ export class ObstacleManager {
       ctx.beginPath(); ctx.arc(o.x, o.y, o.r + 6 + Math.sin(o.age * 20) * 3, 0, TAU); ctx.stroke();
     }
     ctx.translate(o.x, o.y); ctx.rotate(o.age * 1.2);
-    ctx.shadowColor = o.glow; ctx.shadowBlur = o.phase === "charge" ? 26 : 18;
+    ctx.shadowColor = o.glow;     ctx.shadowBlur = o.phase === "charge" ? 32 : 24;
     ctx.fillStyle = o.color;
     starPath(ctx, 0, 0, o.r, o.r * 0.5, 6, 0); ctx.fill();
     ctx.shadowBlur = 0;

@@ -14,7 +14,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-50 -30 100 60'%3E%3Crect width='100%25' height='100%25' x='-50' y='-30' fill='%2305060D'/%3E%3Cpolygon points='38,0 -28,-22 -14,0 -28,22' fill='rgba(5,6,13,0.85)' stroke='%2300F5FF' stroke-width='3'/%3E%3Ccircle cx='0' cy='0' r='6' fill='%23fff'/%3E%3C/svg%3E" />
     <title>NEON RUSH — Arcade Survival</title>
-  </head>
+  
+    <!-- Push44 – Base44 Badge Blocker -->
+    <style>#base44-edit-badge,#base44-badge,.base44-badge,div[id*='base44'],[data-base44-badge],.made-with-base44,[class*='base44'],#admin-footer{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;}</style>
+    <!-- Disable system gestures & selections for game / Play Store compliance -->
+    <script>
+      (function() {
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); }, false);
+        document.addEventListener('selectstart', function(e) {
+          var t = e.target;
+          if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+          e.preventDefault();
+        }, false);
+        document.addEventListener('gesturestart', function(e) { e.preventDefault(); }, false);
+        document.addEventListener('touchmove', function(e) {
+          if (e.touches && e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
+      })();
+    </script>
+</head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>

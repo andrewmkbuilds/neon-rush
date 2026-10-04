@@ -13,7 +13,7 @@ const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const lerp = (a, b, t) => a + (b - a) * t;
 const dist = (x1, y1, x2, y2) => Math.hypot(x1 - x2, y1 - y2);
 
-export const PLAYER_RADIUS = 13;
+export const PLAYER_RADIUS = 16;
 const NEAR_MISS_RADIUS = 32;
 const COMBO_MAX_TIME = 4.0;
 
@@ -133,7 +133,7 @@ export class GameEngine {
 
     this.keys = new Set();
     this.joy = { active: false, pointerId: null, bx: 0, by: 0, x: 0, y: 0 };
-    this.joyRadius = 70; // configurable max joystick radius
+    this.joyRadius = 80; // configurable max joystick radius
     this.mouse = { x: 0, y: 0, active: false };
     this.lastDir = { x: 1, y: 0 };
     this.touch = typeof window !== "undefined" && window.matchMedia ? window.matchMedia("(pointer: coarse)").matches : false;
@@ -253,7 +253,7 @@ export class GameEngine {
     if (this.joy.active) {
       const dx = this.joy.x - this.joy.bx, dy = this.joy.y - this.joy.by;
       const mag = Math.hypot(dx, dy);
-      if (mag > 6) {
+      if (mag > 4) {
         const m = Math.min(1, mag / this.joyRadius);
         ix += (dx / mag) * m;
         iy += (dy / mag) * m;
@@ -1218,7 +1218,7 @@ export class GameEngine {
     }
 
     // ship body (arrow) — drawn at a larger visual scale; collision stays at p.r
-    const dr = p.r * 1.18;
+    const dr = p.r * 1.3;
     const blink = p.invuln > 0 && Math.floor(this.time * 20) % 2 === 0;
     ctx.globalAlpha = blink ? 0.4 : 1;
     ctx.strokeStyle = skin.color;
@@ -1238,8 +1238,8 @@ export class GameEngine {
 
     // core
     ctx.fillStyle = skin.core;
-    ctx.shadowColor = skin.core; ctx.shadowBlur = 12;
-    ctx.beginPath(); ctx.arc(0, 0, 5, 0, TAU); ctx.fill();
+    ctx.shadowColor = skin.core; ctx.shadowBlur = 14;
+    ctx.beginPath(); ctx.arc(0, 0, 6, 0, TAU); ctx.fill();
     ctx.shadowBlur = 0;
     ctx.globalAlpha = 1;
     ctx.restore();
@@ -1264,8 +1264,8 @@ export class GameEngine {
     const kx = bx + Math.cos(ang) * mag;
     const ky = by + Math.sin(ang) * mag;
     ctx.fillStyle = "rgba(0,245,255,0.85)";
-    ctx.shadowColor = "#00F5FF"; ctx.shadowBlur = 18;
-    ctx.beginPath(); ctx.arc(kx, ky, 24, 0, TAU); ctx.fill();
+    ctx.shadowColor = "#00F5FF"; ctx.shadowBlur = 20;
+    ctx.beginPath(); ctx.arc(kx, ky, 28, 0, TAU); ctx.fill();
     ctx.shadowBlur = 0;
   }
 }

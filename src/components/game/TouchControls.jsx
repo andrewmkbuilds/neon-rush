@@ -5,10 +5,9 @@ function AbilityButton({ icon: Icon, label, ready, cd, active, color, onActivate
   const pct = cd > 0 ? Math.max(0, Math.min(1, 1 - cd / maxCd)) : 1;
   return (
     <button
-      onClick={onActivate}
-      onMouseDown={(e) => e.preventDefault()}
+      onPointerDown={(e) => { e.preventDefault(); onActivate(); }}
       disabled={disabled || !ready}
-      className="relative w-16 h-16 sm:w-[4.5rem] sm:h-[4.5rem] rounded-2xl border backdrop-blur flex flex-col items-center justify-center transition-all active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
+      className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border backdrop-blur flex flex-col items-center justify-center transition-all active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 touch-none"
       style={{
         borderColor: ready ? color : "rgba(255,255,255,0.1)",
         background: active ? `${color}33` : "rgba(255,255,255,0.05)",
@@ -17,7 +16,7 @@ function AbilityButton({ icon: Icon, label, ready, cd, active, color, onActivate
       }}
       aria-label={label}
     >
-      <Icon size={22} style={{ color: ready ? color : "#64748B" }} />
+      <Icon size={28} style={{ color: ready ? color : "#64748B" }} />
       <span className="text-xs mt-0.5 uppercase tracking-wider" style={{ color: ready ? "#F8FAFC" : "#64748B" }}>
         {label}
       </span>
@@ -38,7 +37,7 @@ function AbilityButton({ icon: Icon, label, ready, cd, active, color, onActivate
 
 export default function TouchControls({ hud, onDash, onShield, onSlow }) {
   return (
-    <div className="absolute bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-[calc(0.75rem+env(safe-area-inset-right))] sm:bottom-4 sm:right-4 z-10 flex gap-3 sm:gap-4 touch-none">
+    <div className="absolute bottom-[calc(0.75rem+env(safe-area-inset-bottom))] right-[calc(0.75rem+env(safe-area-inset-right))] sm:bottom-4 sm:right-4 z-10 flex gap-4 sm:gap-5 touch-none">
       {hud.unlocked.slow && (
         <AbilityButton
           icon={Hourglass}
