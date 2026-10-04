@@ -1,0 +1,286 @@
+name: Build Android
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # contents: write lets the first build commit the generated keystore back to the
+    # repo so every future update is signed with that SAME key (Play requirement).
+    permissions:
+      contents: write
+    env:
+      KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Set up Android SDK
+        shell: bash
+        run: |
+          # GitHub's Ubuntu runner already includes Android command-line tools.
+          # Install only build dependencies: the setup-android action also requests
+          # the obsolete "tools" package, which downloads the emulator and can fail
+          # on a corrupt emulator archive even though this workflow needs no emulator.
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          [ -x "$SDKMANAGER" ] || SDKMANAGER="$(command -v sdkmanager)"
+          [ -x "$SDKMANAGER" ] || { echo "::error::sdkmanager not found"; exit 1; }
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+      - name: Generate Gradle wrapper (if missing)
+        working-directory: android
+        run: |
+          if [ ! -f gradlew ] || [ ! -f gradle/wrapper/gradle-wrapper.jar ] || ! grep -q 'gradle-8.11.1-bin.zip' gradle/wrapper/gradle-wrapper.properties; then
+            echo "Generating pinned Gradle 8.11.1 wrapper in an isolated project..."
+            WRAPPER_DIR=$(mktemp -d)
+            printf "rootProject.name = 'wrapper-bootstrap'\n" > "$WRAPPER_DIR/settings.gradle"
+            touch "$WRAPPER_DIR/build.gradle"
+            gradle --no-daemon -p "$WRAPPER_DIR" wrapper --gradle-version 8.11.1 --distribution-type bin
+            mkdir -p gradle/wrapper
+            cp "$WRAPPER_DIR/gradlew" "$WRAPPER_DIR/gradlew.bat" .
+            cp "$WRAPPER_DIR/gradle/wrapper/"* gradle/wrapper/
+            rm -rf "$WRAPPER_DIR"
+          fi
+          chmod +x gradlew
+      - name: Restore or create persistent signing keystore
+        working-directory: android
+        run: |
+          if [ -z "$KEYSTORE_PASSWORD" ]; then
+            echo "::error::ANDROID_KEYSTORE_PASSWORD secret is missing — cannot sign consistently."
+            exit 1
+          fi
+          if [ -f keystore/release.keystore ]; then
+            echo "Reusing the app's existing signing key (keystore/release.keystore)."
+            cp keystore/release.keystore release.keystore
+          else
+            echo "No signing key yet — creating the app's permanent key (used for ALL future updates)."
+            mkdir -p keystore
+            keytool -genkeypair -v \
+              -keystore keystore/release.keystore \
+              -alias appnative \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "$KEYSTORE_PASSWORD" -keypass "$KEYSTORE_PASSWORD" \
+              -dname "CN=NeonRush, OU=Mobile, O=AppNative, L=, S=, C=US"
+            cp keystore/release.keystore release.keystore
+            echo "NEW_KEYSTORE=1" >> $GITHUB_ENV
+          fi
+          # Export the public upload certificate (.pem) — this is the file Google asks
+          # for during a Play Console "upload key reset". Kept next to the keystore so
+          # the platform can offer it for download.
+          if [ ! -f keystore/upload_certificate.pem ]; then
+            keytool -exportcert -rfc \
+              -keystore keystore/release.keystore \
+              -alias appnative \
+              -storepass "$KEYSTORE_PASSWORD" \
+              -file keystore/upload_certificate.pem
+            echo "NEW_CERT=1" >> $GITHUB_ENV
+          fi
+      - name: Save the signing key for future updates
+        if: env.NEW_KEYSTORE == '1' || env.NEW_CERT == '1'
+        working-directory: android
+        run: |
+          git config user.name "appnative-build"
+          git config user.email "build@appnative.io"
+          git add -f keystore/release.keystore keystore/upload_certificate.pem
+          git commit -m "[AppNative] Store permanent Android signing key + upload certificate"
+          git push
+      - name: Generate launcher icons
+        working-directory: android
+        run: |
+          SRC_FILE=app/src/main/res/mipmap-anydpi/icon_url.txt
+          ICON_URL=""
+          [ -f "$SRC_FILE" ] && ICON_URL=$(cat "$SRC_FILE")
+          # ubuntu-latest (24.04) runners no longer ship ImageMagick — install it if
+          # neither "convert" nor "magick" exists, or this step dies with exit 127.
+          if ! command -v convert >/dev/null 2>&1 && ! command -v magick >/dev/null 2>&1; then
+            echo "ImageMagick not on runner — installing..."
+            sudo apt-get update -qq && sudo apt-get install -y -qq imagemagick
+          fi
+          IM=convert
+          command -v convert >/dev/null 2>&1 || IM="magick"
+          if [ -n "$ICON_URL" ]; then
+            echo "Downloading launcher icon..."
+            curl -sL "$ICON_URL" -o source_icon.png
+          else
+            echo "No icon configured — generating a solid placeholder."
+            $IM -size 512x512 xc:"#3B82F6" source_icon.png
+          fi
+          # Many icons ship with their OWN background baked in (a solid/branded square).
+          # For those, padding with the app's brand color would draw a visible square-in-a-
+          # square seam, so extend the icon's own edge color instead. Only a genuinely
+          # transparent-cornered logo falls back to the configured brand background.
+          # Sample the MIDDLE of the top edge (not the corner): rounded-square icons that
+          # were flattened onto black have black corners, which would frame the tile in a
+          # dark border. The edge midpoint is always inside the icon's own shape.
+          # If the corners are transparent (rounded-square / padded icon), first crop away
+          # any transparent margin so the sampled edge is the icon's real edge color.
+          if [ "$($IM source_icon.png -format "%[fx:floor(255*p{0,0}.a)]" info: 2>/dev/null || echo 255)" -le 250 ]; then
+            $IM source_icon.png -trim +repage source_icon.png
+          fi
+          CORNER_ALPHA=$($IM source_icon.png -format "%[fx:floor(255*p{w/2,2}.a)]" info: 2>/dev/null || echo 255)
+          if [ "${CORNER_ALPHA:-255}" -gt 250 ]; then
+            FILL=$($IM source_icon.png -alpha off -format "%[pixel:p{w/2,2}]" info:)
+            echo "Icon has its own background — padding with its edge color ($FILL)"
+          else
+            FILL="#04060b"
+            echo "Icon has a transparent background — padding with the brand color ($FILL)"
+          fi
+          # Flatten transparency onto that fill (Play rejects odd alpha edges).
+          $IM source_icon.png -background "$FILL" -alpha remove -alpha off flat_icon.png
+          for PAIR in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            DPI=${PAIR%%:*}; PX=${PAIR##*:}
+            DIR="app/src/main/res/mipmap-$DPI"
+            mkdir -p "$DIR"
+            $IM flat_icon.png -resize ${PX}x${PX} "$DIR/ic_launcher.png"
+            # Launchers apply their own circular mask, so the round variant is the same art.
+            cp "$DIR/ic_launcher.png" "$DIR/ic_launcher_round.png"
+            echo "Generated $DPI icons (${PX}px)"
+          done
+          # Adaptive-icon foreground. Two cases:
+          #  * The icon ALREADY carries its own artwork background (a designed square/rounded
+          #    tile). Then it IS the tile: fill the whole 108dp canvas with it edge-to-edge and
+          #    let Android's mask round the corners, exactly like every store-bought app icon.
+          #    No shrinking, no padding, no border.
+          #  * The icon is a bare transparent logo. Then it must sit inside Google's safe
+          #    centered 66dp circle or the mask clips it, over the brand background color.
+          for PAIR in mdpi:108:66 hdpi:162:99 xhdpi:216:132 xxhdpi:324:198 xxxhdpi:432:264; do
+            DPI=$(echo $PAIR | cut -d: -f1); CANVAS=$(echo $PAIR | cut -d: -f2); SAFE=$(echo $PAIR | cut -d: -f3)
+            DIR="app/src/main/res/mipmap-$DPI"
+            if [ "${CORNER_ALPHA:-255}" -gt 250 ]; then
+              $IM flat_icon.png -resize ${CANVAS}x${CANVAS}^ -gravity center \
+                -extent ${CANVAS}x${CANVAS} "$DIR/ic_launcher_foreground.png"
+              echo "Generated $DPI adaptive foreground (${CANVAS}px, icon used full-bleed)"
+            else
+              $IM flat_icon.png -resize ${SAFE}x${SAFE} -background "$FILL" \
+                -gravity center -extent ${CANVAS}x${CANVAS} "$DIR/ic_launcher_foreground.png"
+              echo "Generated $DPI adaptive foreground (${CANVAS}px canvas, ${SAFE}px safe zone for transparent logo)"
+            fi
+          done
+          # Android 12+ system splash icon: 288dp canvas with the art inside a centered
+          # 192dp circle (the spec for an icon with NO icon background). Transparent
+          # surround so the OS draws it on the splash color without cropping anything.
+          for PAIR in mdpi:288:192 hdpi:432:288 xhdpi:576:384 xxhdpi:864:576 xxxhdpi:1152:768; do
+            DPI=$(echo $PAIR | cut -d: -f1); CANVAS=$(echo $PAIR | cut -d: -f2); INNER=$(echo $PAIR | cut -d: -f3)
+            DIR="app/src/main/res/drawable-$DPI"
+            mkdir -p "$DIR"
+            $IM source_icon.png -resize ${INNER}x${INNER} -background none \
+              -gravity center -extent ${CANVAS}x${CANVAS} "$DIR/splash_icon.png"
+            echo "Generated $DPI splash icon (${CANVAS}px canvas, ${INNER}px art)"
+          done
+          rm -f source_icon.png flat_icon.png "$SRC_FILE"
+          rmdir app/src/main/res/mipmap-anydpi 2>/dev/null || true
+      - name: Generate splash screen images
+        working-directory: android
+        run: |
+          SPLASH_FILE=splash_logo_url.txt
+          SPLASH_URL=""
+          [ -f "$SPLASH_FILE" ] && SPLASH_URL=$(cat "$SPLASH_FILE")
+          if [ -z "$SPLASH_URL" ]; then
+            echo "No splash image configured — solid color splash only."
+            rm -f "$SPLASH_FILE"
+            exit 0
+          fi
+          if ! command -v convert >/dev/null 2>&1 && ! command -v magick >/dev/null 2>&1; then
+            sudo apt-get update -qq && sudo apt-get install -y -qq imagemagick
+          fi
+          IM=convert
+          command -v convert >/dev/null 2>&1 || IM="magick"
+          curl -sL "$SPLASH_URL" -o splash_src.png
+          if [ "0" = "1" ]; then
+            # Full-screen: cover a tall phone canvas so nothing looks stretched.
+            for PAIR in mdpi:360x760 hdpi:540x1140 xhdpi:720x1520 xxhdpi:1080x2280 xxxhdpi:1440x3040; do
+              DPI=${PAIR%%:*}; DIM=${PAIR##*:}
+              DIR="app/src/main/res/drawable-$DPI"
+              mkdir -p "$DIR"
+              $IM splash_src.png -resize "${DIM}^" -gravity center -extent "$DIM" \
+                -background "#0A0F1C" -flatten "$DIR/splash_logo.png"
+              echo "Generated $DPI full-screen splash ($DIM)"
+            done
+          else
+            # Centered logo at ~160dp, transparency preserved so it sits on the brand color.
+            for PAIR in mdpi:160 hdpi:240 xhdpi:320 xxhdpi:480 xxxhdpi:640; do
+              DPI=${PAIR%%:*}; PX=${PAIR##*:}
+              DIR="app/src/main/res/drawable-$DPI"
+              mkdir -p "$DIR"
+              $IM splash_src.png -resize "${PX}x${PX}>" -background none -gravity center -extent "${PX}x${PX}" "$DIR/splash_logo.png"
+              echo "Generated $DPI splash logo (${PX}px)"
+            done
+          fi
+          rm -f splash_src.png "$SPLASH_FILE"
+      - name: Bundle notification sounds
+        working-directory: android
+        run: |
+          SOUNDS_FILE=push_sounds.txt
+          if [ ! -f "$SOUNDS_FILE" ]; then
+            echo "No custom notification sounds configured."
+            exit 0
+          fi
+          mkdir -p app/src/main/res/raw
+          while read -r RES EXT URL; do
+            [ -z "$RES" ] && continue
+            if curl -fsL "$URL" -o "app/src/main/res/raw/$RES.$EXT"; then
+              echo "Bundled sound $RES.$EXT"
+            else
+              echo "::warning::Could not download notification sound $RES ($URL) — default tone will play"
+            fi
+          done < "$SOUNDS_FILE"
+          rm -f "$SOUNDS_FILE"
+      - name: Build release APK (unsigned)
+        working-directory: android
+        run: ./gradlew assembleRelease
+      - name: Zipalign & sign APK
+        working-directory: android
+        run: |
+          BUILD_TOOLS_DIR=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
+          echo "Using build-tools: $BUILD_TOOLS_DIR"
+
+          # Gradle may emit app-release-unsigned.apk or app-release.apk — handle both.
+          IN_APK=app/build/outputs/apk/release/app-release-unsigned.apk
+          if [ ! -f "$IN_APK" ]; then
+            IN_APK=app/build/outputs/apk/release/app-release.apk
+          fi
+          echo "Input APK: $IN_APK"
+
+          # 1) Zipalign (required before apksigner)
+          "$BUILD_TOOLS_DIR/zipalign" -p -f 4 "$IN_APK" app-aligned.apk
+
+          # 2) Sign with v1+v2+v3 so it installs on every Android version
+          "$BUILD_TOOLS_DIR/apksigner" sign \
+            --ks release.keystore \
+            --ks-key-alias appnative \
+            --ks-pass "pass:$KEYSTORE_PASSWORD" \
+            --key-pass "pass:${KEY_PASSWORD:-$KEYSTORE_PASSWORD}" \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            --out app-release-signed.apk \
+            app-aligned.apk
+
+          # 3) Verify before shipping
+          "$BUILD_TOOLS_DIR/apksigner" verify --verbose app-release-signed.apk
+      - name: Build & sign release AAB (Play Store)
+        working-directory: android
+        run: |
+          # Google Play requires an Android App Bundle (.aab) for store uploads.
+          ./gradlew bundleRelease
+          jarsigner -keystore release.keystore \
+            -storepass "$KEYSTORE_PASSWORD" -keypass "${KEY_PASSWORD:-$KEYSTORE_PASSWORD}" \
+            app/build/outputs/bundle/release/app-release.aab appnative
+          cp app/build/outputs/bundle/release/app-release.aab app-release.aab
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: android/app-release-signed.apk
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: android/app-release.aab

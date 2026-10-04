@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="SplashTheme" parent="AppTheme">
+        <item name="android:windowBackground">@color/splash_background</item>
+        <!-- Android 12+ locks its system splash to "solid color + centered icon". By default
+             we keep that frame a clean solid brand color and draw the real artwork ourselves
+             in MainActivity (same look as the iOS launch screen). Turning on the system logo
+             adds the icon back, which shows as a brief double splash. -->
+        <item name="android:windowSplashScreenBackground">@color/splash_background</item>
+        <!-- Per Google's spec an icon WITHOUT an icon background must be a 288dp canvas
+             with the artwork inside a centered 192dp circle. splash_icon is generated to
+             exactly that ratio at build time — handing Android a full-bleed square icon
+             here makes it crop/squash the art into the circular slot. -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
+    </style>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false"><trust-anchors><certificates src="system" /></trust-anchors></base-config>
+    <domain-config cleartextTrafficPermitted="false"><domain includeSubdomains="true">the-neonrush.base44.app</domain></domain-config>
+    <domain-config cleartextTrafficPermitted="false"><domain includeSubdomains="true">accounts.google.com</domain></domain-config>
+    <domain-config cleartextTrafficPermitted="false"><domain includeSubdomains="true">apis.google.com</domain></domain-config>
+    <domain-config cleartextTrafficPermitted="false"><domain includeSubdomains="true">oauth2.googleapis.com</domain></domain-config>
+    <domain-config cleartextTrafficPermitted="false"><domain includeSubdomains="true">www.googleapis.com</domain></domain-config>
+    <domain-config cleartextTrafficPermitted="false"><domain includeSubdomains="true">appleid.apple.com</domain></domain-config>
+    <domain-config cleartextTrafficPermitted="false"><domain includeSubdomains="true">app.base44.com</domain></domain-config>
+    <domain-config cleartextTrafficPermitted="false"><domain includeSubdomains="true">api.base44.com</domain></domain-config>
+    <domain-config cleartextTrafficPermitted="false"><domain includeSubdomains="true">accounts.base44.com</domain></domain-config>
+    <domain-config cleartextTrafficPermitted="false"><domain includeSubdomains="true">lovable.dev</domain></domain-config>
+    <domain-config cleartextTrafficPermitted="false"><domain includeSubdomains="true">api.lovable.dev</domain></domain-config>
+    <domain-config cleartextTrafficPermitted="false"><domain includeSubdomains="true">github.com</domain></domain-config>
+    <domain-config cleartextTrafficPermitted="false"><domain includeSubdomains="true">api.github.com</domain></domain-config>
+</network-security-config>
