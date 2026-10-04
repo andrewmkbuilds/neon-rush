@@ -129,7 +129,7 @@ jobs:
             FILL=$($IM source_icon.png -alpha off -format "%[pixel:p{w/2,2}]" info:)
             echo "Icon has its own background — padding with its edge color ($FILL)"
           else
-            FILL="#04060b"
+            FILL="#090e21"
             echo "Icon has a transparent background — padding with the brand color ($FILL)"
           fi
           # Flatten transparency onto that fill (Play rejects odd alpha edges).
