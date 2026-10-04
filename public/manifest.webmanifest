@@ -1,0 +1,14 @@
+{
+  "name": "NEON RUSH — Arcade Survival",
+  "short_name": "NEON RUSH",
+  "description": "Enter the neon arena. Dodge the impossible. Chase the perfect run. A futuristic arcade survival game.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#05060D",
+  "theme_color": "#05060D",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "name": "ContactMessage",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "email": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "message": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional short summary of the message"
+    }
+  },
+  "required": [
+    "name",
+    "email",
+    "message"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

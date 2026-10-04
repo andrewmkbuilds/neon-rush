@@ -1,0 +1,69 @@
+{
+  "name": "Score",
+  "type": "object",
+  "properties": {
+    "player_name": {
+      "type": "string",
+      "maxLength": 16
+    },
+    "score": {
+      "type": "number"
+    },
+    "wave": {
+      "type": "number"
+    },
+    "max_combo": {
+      "type": "number"
+    },
+    "duration": {
+      "type": "number"
+    },
+    "skin": {
+      "type": "string"
+    },
+    "energy": {
+      "type": "number"
+    },
+    "difficulty": {
+      "type": "string",
+      "description": "Difficulty mode the run was played on: easy | normal | hard"
+    },
+    "badges": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Badge ids the player had earned at submission time, shown on the leaderboard"
+    },
+    "path": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "Normalized player path [x,y,x,y...] in 0..1, downsampled, for run playback"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Optional short note or caption the player added to this run"
+    }
+  },
+  "required": [
+    "player_name",
+    "score"
+  ],
+  "rls": {
+    "read": {},
+    "create": {},
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
