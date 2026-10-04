@@ -168,6 +168,7 @@ export async function submitGlobalScore(entry) {
     difficulty: String(entry.difficulty || "normal"),
     badges: Array.isArray(entry.badges) ? entry.badges.slice(0, 12) : [],
     path: Array.isArray(entry.path) ? entry.path.slice(0, 400) : [],
+    daily_challenge: entry.daily_challenge || null,
   };
   // Offline: don't attempt a round-trip — queue for later sync.
   if (!isOnline()) {
@@ -213,6 +214,15 @@ export async function fetchGlobalScores() {
   if (!isOnline()) return [];
   try {
     return await base44.entities.Score.list("-score", 50);
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function fetchDailyScores(dateKey) {
+  if (!isOnline()) return [];
+  try {
+    return await base44.entities.Score.filter({ daily_challenge: dateKey }, "-score", 50);
   } catch (e) {
     return [];
   }

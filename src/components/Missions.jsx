@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ArrowLeft, Check, Gem, Star, Lock, Flame, Loader2 } from "lucide-react";
 import { getMissionView } from "@/game/missions";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import NeonBackground from "@/components/ui/NeonBackground";
 
 const DIFF_COLOR = { Easy: "#34D399", Normal: "#FFD166", Hard: "#FF3B5C" };
 
@@ -48,6 +49,7 @@ export default function Missions({ profile, onBack, onClaim }) {
 
   return (
     <div ref={ref} className="relative h-screen w-full bg-[#05060D] text-[#F8FAFC] overflow-y-auto">
+      <NeonBackground />
       <div className="flex items-center justify-center overflow-hidden text-[#00F5FF]" style={{ height: pull }}>
         <Loader2 size={22} className={refreshing ? "animate-spin" : ""} />
       </div>

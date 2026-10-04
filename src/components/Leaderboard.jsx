@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { ArrowLeft, Trophy, Calendar, User, Globe, Loader2, Radio, Play, WifiOff } from "lucide-react";
-import { getLeaderboardSections, fetchGlobalScores, subscribeGlobalScores } from "@/game/storage";
+import { getLeaderboardSections, fetchGlobalScores, fetchDailyScores, subscribeGlobalScores } from "@/game/storage";
+import { dateKey } from "@/game/dailyChallenge";
 import PlaybackModal from "@/components/PlaybackModal";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { badgeById } from "@/game/badges";
 import { getDifficulty } from "@/game/difficulties";
+import NeonBackground from "@/components/ui/NeonBackground";
 
 function fmtDate(ts) {
   const d = new Date(ts);
@@ -22,6 +24,7 @@ export default function Leaderboard({ profile, onBack }) {
   const [tab, setTab] = useState("global");
   const [globalScores, setGlobalScores] = useState([]);
   const [weeklyGlobal, setWeeklyGlobal] = useState([]);
+  const [dailyScores, setDailyScores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [live, setLive] = useState(false);
   const [playback, setPlayback] = useState(null);
@@ -34,6 +37,7 @@ export default function Leaderboard({ profile, onBack }) {
     setGlobalScores(arr);
     const weekAgo = Date.now() - 7 * 24 * 3600 * 1000;
     setWeeklyGlobal(arr.filter((e) => toMs(e.created_date) >= weekAgo));
+    setDailyScores(await fetchDailyScores(dateKey()));
   }, [online]);
   const { ref, pull, refreshing } = usePullToRefresh(reload);
 
@@ -55,6 +59,7 @@ export default function Leaderboard({ profile, onBack }) {
       setGlobalScores(arr);
       const weekAgo = Date.now() - 7 * 24 * 3600 * 1000;
       setWeeklyGlobal(arr.filter((e) => toMs(e.created_date) >= weekAgo));
+      setDailyScores(await fetchDailyScores(dateKey()));
       setLoading(false);
     };
     load();
@@ -67,6 +72,7 @@ export default function Leaderboard({ profile, onBack }) {
   }, [online]);
 
   const tabs = [
+    { id: "daily", label: "Daily", icon: Calendar },
     { id: "global", label: "Global", icon: Globe },
     { id: "weeklyGlobal", label: "Weekly", icon: Calendar },
     { id: "allTime", label: "Local All", icon: Trophy },
@@ -74,14 +80,16 @@ export default function Leaderboard({ profile, onBack }) {
   ];
 
   let data = [];
-  if (tab === "global") data = globalScores;
+  if (tab === "daily") data = dailyScores;
+  else if (tab === "global") data = globalScores;
   else if (tab === "weeklyGlobal") data = weeklyGlobal;
   else data = sections[tab] || [];
 
-  const isGlobal = tab === "global" || tab === "weeklyGlobal";
+  const isGlobal = tab === "daily" || tab === "global" || tab === "weeklyGlobal";
 
   return (
     <div ref={ref} className="relative h-screen w-full bg-[#05060D] text-[#F8FAFC] overflow-y-auto">
+      <NeonBackground />
       <div className="flex items-center justify-center overflow-hidden text-[#00F5FF]" style={{ height: pull }}>
         <Loader2 size={22} className={refreshing ? "animate-spin" : ""} />
       </div>
@@ -114,7 +122,7 @@ export default function Leaderboard({ profile, onBack }) {
           {isGlobal ? (
             online ? (
               <>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" /> Global leaderboard — live scores from all players worldwide.
+                <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" /> {tab === "daily" ? "Daily challenge — same modifiers, same leaderboard for all pilots today." : "Global leaderboard — live scores from all players worldwide."}
               </>
             ) : (
               <>
@@ -127,6 +135,16 @@ export default function Leaderboard({ profile, onBack }) {
             </>
           )}
         </div>
+
+        {tab === "daily" && dailyScores.length > 0 && dailyScores[0]?.path?.length >= 4 && (
+          <button
+            onClick={() => setPlayback(dailyScores[0])}
+            onMouseDown={(e) => e.preventDefault()}
+            className="w-full mb-3 py-3 rounded-xl border border-[#FF2E93]/40 bg-[#FF2E93]/10 text-[#FF2E93] font-display font-bold tracking-wider flex items-center justify-center gap-2 hover:bg-[#FF2E93]/20 active:scale-95 transition"
+          >
+            <Play size={16} fill="#FF2E93" /> WATCH TODAY'S BEST: {dailyScores[0].player_name}
+          </button>
+        )}
 
         {isGlobal && !online ? (
           <div className="rounded-2xl border border-[#FF3B5C]/25 bg-[#FF3B5C]/5 p-10 text-center">

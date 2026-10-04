@@ -20,6 +20,8 @@ import { loadProfile, saveProfile, submitScoreLocal, submitGlobalScore, getBestP
 import Store from "@/components/Store";
 import Settings from "@/components/Settings";
 import Stats from "@/components/Stats";
+import DailyChallenge from "@/components/DailyChallenge";
+import { getDailyChallenge } from "@/game/dailyChallenge";
 import DifficultySelect from "@/components/DifficultySelect";
 import RunModifiers from "@/components/RunModifiers";
 import { useAuth } from "@/lib/AuthContext";
@@ -49,7 +51,7 @@ export default function Home() {
   const { user, isAuthenticated, navigateToLogin, logout } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const NAV_SCREENS = ["menu", "hangar", "store", "leaderboard", "profile", "settings", "stats", "difficulty", "modifiers", "howto", "story", "missions", "sidequests", "arcade", "database", "missionlogs", "skillchallenges"];
+  const NAV_SCREENS = ["menu", "hangar", "store", "leaderboard", "profile", "settings", "stats", "difficulty", "modifiers", "howto", "story", "missions", "sidequests", "arcade", "database", "missionlogs", "skillchallenges", "daily"];
   const initialScreen = (() => {
     const s = searchParams.get("screen");
     return s && NAV_SCREENS.includes(s) ? s : "menu";
@@ -80,6 +82,7 @@ export default function Home() {
   const [ghostOn, setGhostOn] = useState(false);
   const runDiffRef = useRef("normal");
   const runModsRef = useRef({});
+  const dailyChallengeRef = useRef(null);
   const challengeHandledRef = useRef(false);
   const [currentChapter, setCurrentChapter] = useState(null);
   const [storyResult, setStoryResult] = useState(null);
@@ -229,6 +232,20 @@ export default function Home() {
   const startRun = useCallback((difficulty) => {
     runDiffRef.current = difficulty;
     runModsRef.current = {};
+    dailyChallengeRef.current = null;
+    audioManager.init();
+    audioManager.resume();
+    audioManager.startMusic("game");
+    setLastRunIsNewBest(false);
+    setGameKey((k) => k + 1);
+    setScreen("game");
+  }, []);
+
+  const handlePlayDaily = useCallback(() => {
+    const dc = getDailyChallenge();
+    runDiffRef.current = "normal";
+    runModsRef.current = dc.modifiers;
+    dailyChallengeRef.current = dc.date;
     audioManager.init();
     audioManager.resume();
     audioManager.startMusic("game");
@@ -303,7 +320,7 @@ export default function Home() {
     const playerName = isAuthenticated ? (user?.full_name || user?.email || prev.name) : prev.name;
     submitScoreLocal({ name: playerName, score: summary.score, time: summary.time, wave: summary.wave, energy: summary.energy, orbs: summary.orbsCollected, maxCombo: summary.maxCombo, difficulty: runDiffRef.current });
     if (summary.score > 0) {
-      submitGlobalScore({ name: playerName, score: summary.score, time: summary.time, wave: summary.wave, maxCombo: summary.maxCombo, skin: prev.equippedSkin, energy: summary.energy, path: summary.path, difficulty: runDiffRef.current, badges: earnedBadges(updated) });
+      submitGlobalScore({ name: playerName, score: summary.score, time: summary.time, wave: summary.wave, maxCombo: summary.maxCombo, skin: prev.equippedSkin, energy: summary.energy, path: summary.path, difficulty: runDiffRef.current, badges: earnedBadges(updated), daily_challenge: dailyChallengeRef.current });
     }
     if (isNewBest && summary.score > 0 && prev.settings?.discordWebhook) {
       try {
@@ -894,6 +911,11 @@ export default function Home() {
               onToggleSound={toggleSound}
               onElite={handleElite}
             />
+          </motion.div>
+        )}
+        {screen === "daily" && (
+          <motion.div key="daily" {...pageTransition} className="h-full w-full">
+            <DailyChallenge onBack={goBack} onStart={handlePlayDaily} onLeaderboard={() => setScreen("leaderboard")} />
           </motion.div>
         )}
       </AnimatePresence>

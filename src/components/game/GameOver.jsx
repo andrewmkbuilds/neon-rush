@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { RotateCcw, Home, Trophy, Zap, Target, Clock, Flame, Share2, Twitter, Facebook, Link2, Check, Swords } from "lucide-react";
+import { fireBigConfetti } from "@/lib/confetti";
 
 function Stat({ icon: Icon, label, value, color }) {
   return (
@@ -48,6 +49,13 @@ export default function GameOver({ summary, onRestart, onMenu, onLeaderboard, is
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [summary.score]);
+
+  useEffect(() => {
+    if (isNewBest) {
+      const t1 = setTimeout(() => fireBigConfetti(), 300);
+      return () => clearTimeout(t1);
+    }
+  }, [isNewBest]);
 
   return (
     <div className="absolute inset-0 z-20 overflow-y-auto bg-[#05060D]/85 backdrop-blur-md">

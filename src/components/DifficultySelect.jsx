@@ -1,12 +1,14 @@
 import React from "react";
 import { ArrowLeft, Shield, Zap, Flame, GraduationCap, ChevronRight, Ghost, Sliders } from "lucide-react";
 import { DIFFICULTIES } from "@/game/difficulties";
+import NeonBackground from "@/components/ui/NeonBackground";
 
 const ICONS = { easy: Shield, normal: Zap, hard: Flame };
 
 export default function DifficultySelect({ onBack, onSelect, onTutorial, ghostPath, ghostOn, onToggleGhost, onOpenModifiers }) {
   return (
     <div className="relative h-screen w-full bg-[#05060D] text-[#F8FAFC] overflow-y-auto">
+      <NeonBackground />
       <div className="sticky top-0 z-20 flex items-center justify-between px-4 sm:px-6 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 bg-[#05060D]/90 backdrop-blur border-b border-white/5">
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-[#94A3B8] hover:text-[#F8FAFC] transition">
           <ArrowLeft size={18} /> Back

@@ -1,9 +1,11 @@
 import React from "react";
 import { ArrowLeft, Move, Zap, Shield, Hourglass, Target, Sparkles, Trophy } from "lucide-react";
+import NeonBackground from "@/components/ui/NeonBackground";
 
 export default function HowToPlay({ onBack }) {
   return (
     <div className="relative h-screen w-full bg-[#05060D] text-[#F8FAFC] overflow-y-auto">
+      <NeonBackground />
       <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 sm:px-6 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3">
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-[#94A3B8] hover:text-[#F8FAFC] transition">
           <ArrowLeft size={18} /> Back

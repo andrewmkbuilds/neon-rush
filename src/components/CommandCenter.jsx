@@ -3,27 +3,15 @@ import { Link } from "react-router-dom";
 import {
   Play, BookOpen, Target, Compass, Gamepad2, Plane, Trophy, Database as DbIcon,
   User, Settings as SettingsIcon, BarChart3, HelpCircle, Volume2, VolumeX,
-  Gem, ChevronRight, Lock, Star, ClipboardList, Swords, Flame,
+  Gem, ChevronRight, Lock, Star, ClipboardList, Swords, Flame, Calendar,
 } from "lucide-react";
 import Logo from "@/components/Logo";
+import NeonBackground from "@/components/ui/NeonBackground";
+import NeonButton from "@/components/ui/NeonButton";
 import { levelProgress } from "@/game/progression";
 import { getChapter } from "@/game/story";
 import { getMissionView } from "@/game/missions";
 import { getActiveSideQuests } from "@/game/sidequests";
-
-function StarfieldBg() {
-  const [stars] = useState(() =>
-    Array.from({ length: 50 }, () => ({ x: Math.random() * 100, y: Math.random() * 100, s: Math.random() * 2 + 0.5, d: Math.random() * 4 + 2 }))
-  );
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "linear-gradient(rgba(0,245,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.04) 1px,transparent 1px)", backgroundSize: "50px 50px" }} />
-      {stars.map((s, i) => (
-        <span key={i} className="absolute rounded-full bg-[#7DD3FC]" style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.s, height: s.s, opacity: 0.4, animation: `nr-float ${s.d}s ease-in-out infinite alternate` }} />
-      ))}
-    </div>
-  );
-}
 
 function ModeCard({ icon: Icon, title, subtitle, color, onClick, locked, badge }) {
   return (
@@ -67,7 +55,7 @@ export default function CommandCenter({ profile, onNav, onPlay, onContinue, cont
 
   return (
     <div className="relative h-screen w-full overflow-y-auto bg-[#05060D] text-[#F8FAFC]">
-      <StarfieldBg />
+      <NeonBackground />
 
       {/* Header */}
       <header className="relative z-20 flex items-center justify-between gap-2 px-4 sm:px-6 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3">
@@ -131,22 +119,12 @@ export default function CommandCenter({ profile, onNav, onPlay, onContinue, cont
 
         {/* Primary actions */}
         <div className="mt-6 w-full max-w-xl grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button
-            onClick={onContinue}
-            onMouseDown={(e) => e.preventDefault()}
-            className="relative px-6 py-5 rounded-2xl font-display font-black tracking-[0.15em] text-[#05060D] active:scale-95 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF2E93]/60"
-            style={{ background: "linear-gradient(90deg,#FF2E93,#8B5CF6)", boxShadow: "0 0 24px rgba(255,46,147,0.4)" }}
-          >
-            <span className="flex items-center justify-center gap-2"><Play size={20} fill="#05060D" /> {continueLabel || "CONTINUE"}</span>
-          </button>
-          <button
-            onClick={onPlay}
-            onMouseDown={(e) => e.preventDefault()}
-            className="relative px-6 py-5 rounded-2xl font-display font-black tracking-[0.15em] text-[#05060D] active:scale-95 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]/60"
-            style={{ background: "linear-gradient(90deg,#00F5FF,#8B5CF6)", boxShadow: "0 0 24px rgba(0,245,255,0.4)" }}
-          >
-            <span className="flex items-center justify-center gap-2"><Play size={20} fill="#05060D" /> SURVIVAL</span>
-          </button>
+          <NeonButton onClick={onContinue} color="#FF2E93" size="lg" pulse className="py-5 rounded-2xl font-black tracking-[0.15em]">
+            <Play size={20} fill="#05060D" /> {continueLabel || "CONTINUE"}
+          </NeonButton>
+          <NeonButton onClick={onPlay} color="#00F5FF" size="lg" pulse className="py-5 rounded-2xl font-black tracking-[0.15em]">
+            <Play size={20} fill="#05060D" /> SURVIVAL
+          </NeonButton>
         </div>
 
         {/* Mode cards */}
@@ -161,6 +139,7 @@ export default function CommandCenter({ profile, onNav, onPlay, onContinue, cont
           <ModeCard icon={BarChart3} title="STATS" subtitle="Your performance" color="#34D399" onClick={() => onNav("stats")} />
           <ModeCard icon={ClipboardList} title="MISSION LOGS" subtitle="Track all objectives" color="#22D3EE" onClick={() => onNav("missionlogs")} badge={totalClaimable > 0 ? `${totalClaimable} CLAIM` : undefined} />
           <ModeCard icon={Swords} title="SKILL CHALLENGES" subtitle="No-dash trials" color="#F472B6" onClick={() => onNav("skillchallenges")} />
+          <ModeCard icon={Calendar} title="DAILY CHALLENGE" subtitle="Same modifiers, same leaderboard" color="#FF2E93" onClick={() => onNav("daily")} />
         </div>
 
         {/* Secondary */}

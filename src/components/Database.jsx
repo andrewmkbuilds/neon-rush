@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ArrowLeft, Lock } from "lucide-react";
 import { DATABASE, isEntryUnlocked } from "@/game/database";
+import NeonBackground from "@/components/ui/NeonBackground";
 
 const CATS = [
   { id: "characters", label: "Characters", color: "#00F5FF" },
@@ -14,6 +15,7 @@ export default function Database({ profile, onBack }) {
 
   return (
     <div className="relative h-screen w-full bg-[#05060D] text-[#F8FAFC] overflow-y-auto">
+      <NeonBackground />
       <div className="sticky top-0 z-20 flex items-center justify-between px-4 sm:px-6 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 bg-[#05060D]/90 backdrop-blur border-b border-white/5">
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-[#94A3B8] hover:text-[#F8FAFC] transition"><ArrowLeft size={18} /> Back</button>
         <h1 className="font-display font-black tracking-wider text-lg" style={{ background: "linear-gradient(90deg,#00F5FF,#8B5CF6)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>DATABASE</h1>

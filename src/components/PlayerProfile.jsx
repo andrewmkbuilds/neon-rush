@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ArrowLeft, Edit2, Check, Award, Calendar, Gift, Trash2, AlertTriangle, X } from "lucide-react";
 import { ACHIEVEMENTS, MILESTONES, getTodayChallenge } from "@/game/challenges";
 import { BADGES, earnedBadges } from "@/game/badges";
+import NeonBackground from "@/components/ui/NeonBackground";
 
 const ICONS = { Rocket: Award, Shield: Award, Feather: Award, Flame: Award, Zap: Award, Gauge: Award, Trophy: Award };
 
@@ -24,6 +25,7 @@ export default function PlayerProfile({ profile, onBack, onRename, onClaim, onDe
 
   return (
     <div className="relative h-screen w-full bg-[#05060D] text-[#F8FAFC] overflow-y-auto">
+      <NeonBackground />
       <div className="sticky top-0 z-20 flex items-center justify-between px-4 sm:px-6 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 bg-[#05060D]/90 backdrop-blur border-b border-white/5">
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-[#94A3B8] hover:text-[#F8FAFC] transition">
           <ArrowLeft size={18} /> Back

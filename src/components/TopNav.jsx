@@ -37,19 +37,19 @@ export default function TopNav({ profile, onNav, onPlay, audio }) {
         <button
           onClick={audio.toggleSound}
           onMouseDown={(e) => e.preventDefault()}
-          className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 active:scale-95 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]/40"
+          className="w-11 h-11 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 active:scale-95 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]/40"
           aria-label="Toggle sound"
         >
-          {audio.musicOn ? <Volume2 size={16} className="text-[#00F5FF]" /> : <VolumeX size={16} className="text-[#94A3B8]" />}
+          {audio.musicOn ? <Volume2 size={18} className="text-[#00F5FF]" /> : <VolumeX size={18} className="text-[#94A3B8]" />}
         </button>
         <button
           onClick={() => onNav("profile")}
           onMouseDown={(e) => e.preventDefault()}
-          className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 active:scale-95 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]/40"
+          className="flex items-center gap-2 h-11 pl-2 pr-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 active:scale-95 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]/40"
           aria-label="Profile"
         >
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#00F5FF] to-[#8B5CF6] flex items-center justify-center">
-            <User size={13} className="text-[#05060D]" />
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#00F5FF] to-[#8B5CF6] flex items-center justify-center">
+            <User size={15} className="text-[#05060D]" />
           </div>
           <span className="text-xs font-medium text-[#F8FAFC] hidden sm:block">{profile.name}</span>
         </button>

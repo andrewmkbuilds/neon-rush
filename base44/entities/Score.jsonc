@@ -46,6 +46,10 @@
       "type": "string",
       "maxLength": 1000,
       "description": "Optional short note or caption the player added to this run"
+    },
+    "daily_challenge": {
+      "type": "string",
+      "description": "Date key (YYYY-MM-DD) when this run was a Daily Challenge submission; null/absent for normal runs"
     }
   },
   "required": [
@@ -53,17 +57,24 @@
     "score"
   ],
   "rls": {
-    "read": {},
-    "create": {},
+    "create": null,
+    "read": null,
     "update": {
       "user_condition": {
         "role": "admin"
       }
     },
     "delete": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
     }
   }
 }

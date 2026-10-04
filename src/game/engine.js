@@ -1212,6 +1212,16 @@ export class GameEngine {
       ctx.shadowBlur = 0;
     }
 
+    // hit glow pulse — pulsing red ring during invulnerability after a collision
+    if (p.invuln > 0 && p.shield.active <= 0) {
+      const pulse = 0.5 + Math.sin(this.time * 14) * 0.3;
+      ctx.strokeStyle = `rgba(255,59,92,${pulse})`;
+      ctx.lineWidth = 3;
+      ctx.shadowColor = "#FF3B5C"; ctx.shadowBlur = 20 + pulse * 12;
+      ctx.beginPath(); ctx.arc(0, 0, p.r + 8 + pulse * 4, 0, TAU); ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
     // dash trail glow
     if (p.dash.active > 0) {
       ctx.shadowColor = skin.glow; ctx.shadowBlur = 24;

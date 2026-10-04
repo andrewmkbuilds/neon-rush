@@ -1,6 +1,7 @@
 import React from "react";
 import { ArrowLeft, Check, Play, Gem, Star, Zap, Crosshair } from "lucide-react";
 import { getSkillChallengeView } from "@/game/sidequests";
+import NeonBackground from "@/components/ui/NeonBackground";
 
 const DIFF_COLOR = { Easy: "#34D399", Normal: "#FFD166", Hard: "#FF3B5C" };
 
@@ -25,6 +26,7 @@ export default function SkillChallenges({ profile, onBack, onPlay }) {
 
   return (
     <div className="relative h-screen w-full bg-[#05060D] text-[#F8FAFC] overflow-y-auto">
+      <NeonBackground />
       <div className="sticky top-0 z-20 flex items-center justify-between px-4 sm:px-6 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 bg-[#05060D]/90 backdrop-blur border-b border-white/5">
         <button onClick={onBack} className="flex items-center gap-2 text-sm text-[#94A3B8] hover:text-[#F8FAFC] transition"><ArrowLeft size={18} /> Back</button>
         <h1 className="font-display font-black tracking-wider text-sm sm:text-lg" style={{ background: "linear-gradient(90deg,#F472B6,#FFD166)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>

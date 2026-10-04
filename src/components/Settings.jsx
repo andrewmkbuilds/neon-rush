@@ -1,5 +1,6 @@
 import React from "react";
 import { ArrowLeft, Music, Zap, Info, Bell } from "lucide-react";
+import NeonBackground from "@/components/ui/NeonBackground";
 
 function Toggle({ on, onClick, label, icon: Icon, color }) {
   return (
@@ -42,6 +43,7 @@ export default function Settings({ profile, onBack, onToggleMusic, onToggleSfx, 
   const s = profile.settings;
   return (
     <div className="relative h-screen w-full bg-[#05060D] text-[#F8FAFC] overflow-y-auto">
+      <NeonBackground />
       <div className="sticky top-0 z-20 flex items-center justify-between px-4 sm:px-6 py-3 bg-[#05060D]/90 backdrop-blur border-b border-white/5">
         <button
           onClick={onBack}

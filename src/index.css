@@ -71,6 +71,13 @@
   .touch-none { touch-action: none; }
   /* Prevent scroll bouncing inside mobile WebViews for any scroll panel. */
   .overflow-y-auto { overscroll-behavior-y: contain; }
+  /* Hide scrollbars on mobile while preserving native fluid scrolling. */
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  @media (max-width: 768px) {
+    .overflow-y-auto, .overflow-auto { -ms-overflow-style: none; scrollbar-width: none; }
+    .overflow-y-auto::-webkit-scrollbar, .overflow-auto::-webkit-scrollbar { display: none; }
+  }
 }
 
 @keyframes nr-float {
@@ -93,6 +100,30 @@
 @keyframes nr-diffpulse {
   0%, 100% { box-shadow: 0 0 6px rgba(0,245,255,0.5); }
   50% { box-shadow: 0 0 16px rgba(255,46,147,0.9); }
+}
+@keyframes nr-ripple {
+  from { transform: scale(0); opacity: 0.6; }
+  to { transform: scale(4); opacity: 0; }
+}
+@keyframes nr-glow-pulse {
+  0%, 100% { box-shadow: 0 0 12px var(--glow-color, #00F5FF)88; }
+  50% { box-shadow: 0 0 28px var(--glow-color, #00F5FF)cc; }
+}
+@keyframes nr-nebula-drift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -20px) scale(1.1); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+@keyframes nr-grid-flow {
+  from { background-position: 0 0; }
+  to { background-position: 50px 50px; }
+}
+@keyframes nr-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
