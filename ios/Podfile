@@ -1,0 +1,4 @@
+platform :ios, '15.0'
+target 'NeonRush' do
+  use_frameworks!
+end

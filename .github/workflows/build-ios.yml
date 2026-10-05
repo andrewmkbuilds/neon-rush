@@ -1,0 +1,83 @@
+name: Build iOS
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: |
+          XCODE_PATH=""
+          for ver in 26.0 26 16.4 16.3 16.2 16.1; do
+            for suffix in "" ".0"; do
+              if [ -d "/Applications/Xcode_${ver}${suffix}.app" ]; then
+                XCODE_PATH="/Applications/Xcode_${ver}${suffix}.app"
+                break 2
+              fi
+            done
+          done
+          if [ -z "$XCODE_PATH" ]; then
+            echo "Using default Xcode"
+          else
+            echo "Selecting $XCODE_PATH"
+            sudo xcode-select -s "$XCODE_PATH/Contents/Developer"
+          fi
+          xcodebuild -version
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Install Python image tools
+        run: /usr/bin/python3 -m pip install --user Pillow
+      - name: Clean up superseded native files
+        working-directory: ios
+        run: |
+          rm -rf "NeonRush/Base.lproj"
+          # Commits preserve older repo files. XcodeGen includes every Swift file
+          # in the app directory, so the old bridge duplicates the current delegate.
+          if [ -f "NeonRush/DeepLinkHandler.swift" ] && [ -f "NeonRush/DeepLinkBridge.swift" ]; then
+            echo "Excluding superseded DeepLinkBridge.swift; keeping DeepLinkHandler.swift"
+            mv "NeonRush/DeepLinkBridge.swift" "$RUNNER_TEMP/DeepLinkBridge.swift.disabled"
+          fi
+      - name: Generate Xcode project
+        working-directory: ios
+        run: xcodegen generate
+
+      - name: Wire Keychain bridge
+        working-directory: ios
+        run: |
+          F="NeonRush/WebViewController.swift"
+          if ! grep -q "setupKeychainBridge()" "$F"; then
+            perl -0777 -pi -e 's/(?<a>webView\.load\(URLRequest\(url: url\)\)\s*\n\s*\})/$+{a}\n        setupKeychainBridge()/' "$F"
+          fi
+          grep -q "setupKeychainBridge()" "$F" || { echo "::error::Keychain bridge wiring FAILED — WebViewController.swift anchor not found"; exit 1; }
+          echo "Keychain bridge wired"
+      - name: Wire Rich Push categories
+        working-directory: ios
+        run: |
+          F="NeonRush/WebViewController.swift"
+          if ! grep -q "setupRichPush()" "$F"; then
+            perl -0777 -pi -e 's/(?<a>webView\.load\(URLRequest\(url: url\)\)\s*\n\s*\})/$+{a}\n        setupRichPush()/' "$F"
+          fi
+          grep -q "setupRichPush()" "$F" || { echo "::error::Rich Push wiring FAILED — WebViewController.swift anchor not found"; exit 1; }
+          echo "Rich Push categories wired"
+      - name: Generate App Icons
+        working-directory: ios
+        run: |
+          ICON_DIR="NeonRush/Assets.xcassets/AppIcon.appiconset"
+          # Single-line Python (NO multi-line heredoc) — a multi-line "python3 -c" body
+          # with un-indented lines breaks the YAML "run: |" block scalar.
+          /usr/bin/python3 -c 'import struct,zlib;r=b"".join(b"\x00"+bytes([59,130,246])*1024 for _ in range(1024));c=lambda t,d:struct.pack(">I",len(d))+t+d+struct.pack(">I",zlib.crc32(t+d)&0xffffffff);open("source_icon.png","wb").write(b"\x89PNG\r\n\x1a\n"+c(b"IHDR",struct.pack(">IIBBBBB",1024,1024,8,2,0,0,0))+c(b"IDAT",zlib.compress(r))+c(b"IEND",b""))'
+          for SIZE in 20 29 40 58 60 76 80 87 120 152 167 180 1024; do
+            sips -z $SIZE $SIZE source_icon.png --out "$ICON_DIR/icon_${SIZE}x${SIZE}.png" >/dev/null 2>&1
+          done
+          rm -f source_icon.png
+      - name: Download Splash Logo
+        working-directory: ios
+        run: |
+          F="NeonRush/Assets.xcassets/SplashLogo.imageset/splash_logo_url.txt"
+          [ -f "$F" ] && curl -sL "$(cat $F)" -o "NeonRush/Assets.xcassets/SplashLogo.imageset/splash_logo.png" && rm "$F" && echo "Splash logo downloaded" || true
+      - name: Build (Simulator)
+        working-directory: ios
+        run: |
+          xcodebuild -project NeonRush.xcodeproj -scheme NeonRush -sdk iphonesimulator -configuration Release -destination 'platform=iOS Simulator,name=iPhone 16' build

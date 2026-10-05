@@ -1,0 +1,91 @@
+name: NeonRush
+options:
+  bundleIdPrefix: com.company
+  deploymentTarget:
+    iOS: "15.0"
+targets:
+  NeonRush:
+    type: application
+    platform: iOS
+    sources:
+      - path: NeonRush
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.company.neonrush
+      PRODUCT_NAME: NeonRush
+      MARKETING_VERSION: 1.0.0
+      CURRENT_PROJECT_VERSION: 10
+      INFOPLIST_FILE: NeonRush/Info.plist
+      CODE_SIGN_STYLE: Manual
+      CODE_SIGN_IDENTITY: "Apple Distribution"
+      DEVELOPMENT_TEAM: ""
+      PROVISIONING_PROFILE_SPECIFIER: "__APP_PROFILE_UUID__"
+    dependencies:
+      - sdk: UserNotifications.framework
+      - target: NeonRushNotifService
+    info:
+      path: NeonRush/Info.plist
+      properties:
+        CFBundleName: "Neon-Rush"
+        CFBundleDisplayName: "Neon-Rush"
+        CFBundleExecutable: NeonRush
+        CFBundleIdentifier: com.company.neonrush
+        CFBundlePackageType: APPL
+        CFBundleIconName: AppIcon
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        UILaunchScreen:
+          UIColorName: AppBackground
+        LSRequiresIPhoneOS: true
+        UIRequiredDeviceCapabilities:
+          - armv7
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        "UISupportedInterfaceOrientations~ipad":
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIStatusBarStyle: UIStatusBarStyleLightContent
+        UIViewControllerBasedStatusBarAppearance: true
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+        NSCameraUsageDescription: "Neon-Rush uses the camera so you can take a photo to set as your profile picture or attach to a submission in the app."
+        NSPhotoLibraryUsageDescription: "Neon-Rush accesses your photo library so you can choose an existing photo to set as your profile picture or attach to a submission in the app."
+        NSPhotoLibraryAddUsageDescription: "Neon-Rush saves photos to your photo library so you can keep images you generated or downloaded in the app."
+        NSBluetoothAlwaysUsageDescription: "Neon-Rush uses Bluetooth to connect to nearby devices and accessories you choose to pair."
+        UIBackgroundModes:
+          - remote-notification
+    entitlements:
+      path: NeonRush/NeonRush.entitlements
+      properties:
+        aps-environment: production
+  NeonRushNotifService:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: NeonRushNotifService
+    dependencies:
+      - sdk: UserNotifications.framework
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.company.neonrush.notificationservice
+      PRODUCT_NAME: NeonRushNotifService
+      MARKETING_VERSION: 1.0.0
+      CURRENT_PROJECT_VERSION: 10
+      INFOPLIST_FILE: NeonRushNotifService/Info.plist
+      CODE_SIGN_STYLE: Manual
+      CODE_SIGN_IDENTITY: "Apple Distribution"
+      DEVELOPMENT_TEAM: ""
+      SKIP_INSTALL: "YES"
+    info:
+      path: NeonRushNotifService/Info.plist
+      properties:
+        CFBundleDisplayName: "Neon-Rush"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.usernotifications.service
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).NotificationService"
