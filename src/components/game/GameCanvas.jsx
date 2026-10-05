@@ -6,6 +6,7 @@ import TouchControls from "./TouchControls";
 import PauseMenu from "./PauseMenu";
 import GameOver from "./GameOver";
 import TutorialOverlay from "./TutorialOverlay";
+import ScreenFX from "./ScreenFX";
 
 export default function GameCanvas({
   skinId,
@@ -33,6 +34,14 @@ export default function GameCanvas({
   const [gState, setGState] = useState("ready");
   const [summary, setSummary] = useState(null);
   const completedRef = useRef(false);
+
+  // gameplay intensity 0..1 drives the screen-space FX (scanlines + chromatic aberration)
+  const intensity = hud
+    ? Math.min(1, Math.max(hud.difficultyPct || 0, (hud.multiplier || 1) / 8))
+    : 0;
+  const i = Math.max(0, Math.min(1, (intensity - 0.45) / 0.55));
+  const caOffset = (1 + i * 2.5).toFixed(2);
+  const caAlpha = (0.12 + i * 0.22).toFixed(2);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -91,8 +100,16 @@ export default function GameCanvas({
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full touch-none"
-        style={{ touchAction: "none" }}
+        style={{
+          touchAction: "none",
+          filter:
+            i > 0.05
+              ? `drop-shadow(${caOffset}px 0 0 rgba(255,0,80,${caAlpha})) drop-shadow(-${caOffset}px 0 0 rgba(0,229,255,${caAlpha}))`
+              : "none",
+        }}
       />
+
+      {gState === "playing" && <ScreenFX intensity={intensity} />}
 
       {hud && gState !== "gameover" && !tutorial && (
         <GameHUD hud={hud} onPause={handlePause} soundOn={soundOn} onToggleSound={onToggleSound} />

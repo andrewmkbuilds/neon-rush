@@ -74,6 +74,38 @@
   /* Hide scrollbars on mobile while preserving native fluid scrolling. */
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+  /* Neon-themed scrollbars to match THE NEXUS GRID aesthetic.
+     Thin track, glowing cyan thumb with a magenta hover state. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 229, 255, 0.55) rgba(255, 255, 255, 0.04);
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 1px solid rgba(0, 229, 255, 0.08);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(0, 229, 255, 0.7), rgba(139, 92, 246, 0.7));
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    box-shadow: 0 0 8px rgba(0, 229, 255, 0.45);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(255, 46, 147, 0.85), rgba(0, 229, 255, 0.85));
+    box-shadow: 0 0 14px rgba(255, 46, 147, 0.6);
+  }
+  ::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(180deg, rgba(255, 46, 147, 1), rgba(0, 229, 255, 1));
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
   @media (max-width: 768px) {
     .overflow-y-auto, .overflow-auto { -ms-overflow-style: none; scrollbar-width: none; }
     .overflow-y-auto::-webkit-scrollbar, .overflow-auto::-webkit-scrollbar { display: none; }

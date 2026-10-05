@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   Play, BookOpen, Target, Compass, Gamepad2, Plane, Trophy, Database as DbIcon,
   User, Settings as SettingsIcon, BarChart3, HelpCircle, Volume2, VolumeX,
-  Gem, ChevronRight, Lock, Star, ClipboardList, Swords, Flame, Calendar,
+  Gem, ChevronRight, Lock, Star, ClipboardList, Swords, Flame, Calendar, Bot,
 } from "lucide-react";
 import Logo from "@/components/Logo";
 import NeonBackground from "@/components/ui/NeonBackground";
@@ -140,6 +140,7 @@ export default function CommandCenter({ profile, onNav, onPlay, onContinue, cont
           <ModeCard icon={ClipboardList} title="MISSION LOGS" subtitle="Track all objectives" color="#22D3EE" onClick={() => onNav("missionlogs")} badge={totalClaimable > 0 ? `${totalClaimable} CLAIM` : undefined} />
           <ModeCard icon={Swords} title="SKILL CHALLENGES" subtitle="No-dash trials" color="#F472B6" onClick={() => onNav("skillchallenges")} />
           <ModeCard icon={Calendar} title="DAILY CHALLENGE" subtitle="Same modifiers, same leaderboard" color="#FF2E93" onClick={() => onNav("daily")} />
+          <ModeCard icon={Bot} title="AI ADVISORS" subtitle="Support, coach & tips" color="#A78BFA" onClick={() => onNav("assistants")} />
         </div>
 
         {/* Secondary */}

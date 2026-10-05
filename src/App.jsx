@@ -16,6 +16,7 @@ import Contact from '@/pages/Contact';
 import Guide from '@/pages/Guide';
 import Privacy from '@/pages/Privacy';
 import Terms from '@/pages/Terms';
+import OAuthConsent from '@/pages/OAuthConsent';
 // Add page imports here
 
 const AuthenticatedApp = () => {
@@ -55,6 +56,7 @@ const AuthenticatedApp = () => {
     <Route path="/contact" element={<Contact />} />
     <Route path="/privacy" element={<Privacy />} />
     <Route path="/terms" element={<Terms />} />
+    <Route path="/oauth/consent" element={<OAuthConsent />} />
     <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

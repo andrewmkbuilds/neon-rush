@@ -38,6 +38,7 @@ import { SHIP_SKINS, getSkin } from "@/game/skins";
 import { audioManager } from "@/game/audio";
 import { getLastSeen, setLastSeen, ensurePermission, showStreakReminder, notifSupported } from "@/game/notifications";
 import OfflineIndicator from "@/components/OfflineIndicator";
+import Assistants from "@/components/Assistants";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 const pageTransition = {
@@ -51,7 +52,7 @@ export default function Home() {
   const { user, isAuthenticated, navigateToLogin, logout } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const NAV_SCREENS = ["menu", "hangar", "store", "leaderboard", "profile", "settings", "stats", "difficulty", "modifiers", "howto", "story", "missions", "sidequests", "arcade", "database", "missionlogs", "skillchallenges", "daily"];
+  const NAV_SCREENS = ["menu", "hangar", "store", "leaderboard", "profile", "settings", "stats", "difficulty", "modifiers", "howto", "story", "missions", "sidequests", "arcade", "database", "missionlogs", "skillchallenges", "daily", "assistants"];
   const initialScreen = (() => {
     const s = searchParams.get("screen");
     return s && NAV_SCREENS.includes(s) ? s : "menu";
@@ -121,6 +122,9 @@ export default function Home() {
     const today = new Date().toISOString().slice(0, 10);
     const prev = profileRef.current;
     if (!prev || prev.lastDailyReward === today) return;
+    // Don't hand out a "daily reward" before the pilot has ever played —
+    // the bonus is for coming back, not for opening the app for the first time.
+    if (!prev.totalRuns) return;
     const yd = new Date();
     yd.setUTCDate(yd.getUTCDate() - 1);
     const yesterday = yd.toISOString().slice(0, 10);
@@ -916,6 +920,11 @@ export default function Home() {
         {screen === "daily" && (
           <motion.div key="daily" {...pageTransition} className="h-full w-full">
             <DailyChallenge onBack={goBack} onStart={handlePlayDaily} onLeaderboard={() => setScreen("leaderboard")} />
+          </motion.div>
+        )}
+        {screen === "assistants" && (
+          <motion.div key="assistants" {...pageTransition} className="h-full w-full">
+            <Assistants onBack={goBack} />
           </motion.div>
         )}
       </AnimatePresence>
